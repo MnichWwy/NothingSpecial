@@ -9,6 +9,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import sample.model.Point;
 
@@ -20,9 +21,11 @@ public class Controller extends Application {
     private ScrollPane scrollPane = new ScrollPane();
     private static List<Point> pointList = null;
 
-    private String chosenFigure = "Line";
+    private enum Figure{LINE, CIRCLE, RECTANGLE}
+    private Figure chosenFigure=Figure.RECTANGLE;
     private Point firstClick = null;
     private Point secondClick = null;
+
 
     public static void main(String[] args) {
         launch(args);
@@ -53,15 +56,30 @@ public class Controller extends Application {
 
     private Node draw() {
         switch (chosenFigure) {
-            case "Line":
+            case LINE:
                 return drawLine();
+            case RECTANGLE:
+                return drawRectangle();
+            case CIRCLE:
+                return drawCircle();
         }
         return null;
+    }
+
+    private Node drawCircle() {
+        return null;
+    }
+
+    private Node drawRectangle() {
+        double width = secondClick.getX()-firstClick.getX();
+        double height = secondClick.getY()-firstClick.getY();
+        return new Rectangle(firstClick.getX(), firstClick.getY(), width, height);
     }
 
     private Node drawLine() {
         return new Line(firstClick.getX(), firstClick.getY(), secondClick.getX(), secondClick.getY());
     }
+
 
     private void cleanClicks() {
         secondClick = null;
