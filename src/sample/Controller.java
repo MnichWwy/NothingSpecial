@@ -21,8 +21,9 @@ public class Controller extends Application {
     private ScrollPane scrollPane = new ScrollPane();
     private static List<Point> pointList = null;
 
-    private enum Figure{LINE, CIRCLE, RECTANGLE}
-    private Figure chosenFigure=Figure.RECTANGLE;
+    private enum Figure {LINE, CIRCLE, RECTANGLE}
+
+    private Figure chosenFigure = Figure.CIRCLE;
     private Point firstClick = null;
     private Point secondClick = null;
 
@@ -32,9 +33,9 @@ public class Controller extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws IOException {
+    public void start(Stage primaryStage) {
 
-        pane.setOnMouseClicked((EventHandler<MouseEvent>) event -> {
+        pane.setOnMouseClicked( event -> {
             if (firstClick == null) {
                 firstClick = new Point(event.getX(), event.getY());
                 pane.getChildren().add(new Circle(event.getX(), event.getY(), 0.3));
@@ -67,12 +68,13 @@ public class Controller extends Application {
     }
 
     private Node drawCircle() {
-        return null;
+        double radian = firstClick.distance(secondClick);
+        return new Circle(firstClick.getX(), firstClick.getY(), radian);
     }
 
     private Node drawRectangle() {
-        double width = secondClick.getX()-firstClick.getX();
-        double height = secondClick.getY()-firstClick.getY();
+        double width = secondClick.getX() - firstClick.getX();
+        double height = secondClick.getY() - firstClick.getY();
         return new Rectangle(firstClick.getX(), firstClick.getY(), width, height);
     }
 
