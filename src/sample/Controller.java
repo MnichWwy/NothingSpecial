@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -13,13 +14,9 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import sample.model.Point;
 
-import java.io.IOException;
-import java.util.List;
 
 public class Controller extends Application {
     private Pane pane = new Pane();
-    private ScrollPane scrollPane = new ScrollPane();
-    private static List<Point> pointList = null;
 
     private enum Figure {LINE, CIRCLE, RECTANGLE}
 
@@ -46,7 +43,6 @@ public class Controller extends Application {
                 cleanClicks();
             }
         });
-        scrollPane.setContent(pane);
 
         primaryStage.setTitle("Projekt1");
         primaryStage.setScene(new Scene(pane, 600, 600));
