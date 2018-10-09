@@ -2,11 +2,12 @@ package sample;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
-
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -29,12 +30,13 @@ public class MainController {
     private Figure chosenFigure = Figure.RECTANGLE;
     private Point firstClick = null;
     private Point secondClick = null;
+    private Color color = Color.BLACK;
     private final String chosenFigureMsgTemplate = "Chosen figure: ";
 
     public void chosePoint(MouseEvent event) {
         if (firstClick == null) {
             firstClick = new Point(event.getX(), event.getY());
-            mainPane.getChildren().add(new Circle(event.getX(), event.getY(), 0.3));
+            mainPane.getChildren().add(new Circle(event.getX(), event.getY(), 0.3, color));
         } else {
             secondClick = new Point(event.getX(), event.getY());
             Node node = draw();
@@ -57,22 +59,27 @@ public class MainController {
 
     private Node drawCircle() {
         double radian = firstClick.distance(secondClick);
-        return new Circle(firstClick.getX(), firstClick.getY(), radian);
+        return new Circle(firstClick.getX(), firstClick.getY(), radian, color);
     }
 
     private Node drawRectangle() {
         double width = secondClick.getX() - firstClick.getX();
         double height = secondClick.getY() - firstClick.getY();
-        return new Rectangle(firstClick.getX(), firstClick.getY(), width, height);
+        Rectangle rectangle= new Rectangle(firstClick.getX(), firstClick.getY(), width, height);
+        rectangle.setFill(color);
+        return rectangle;
     }
 
     private Node drawLine() {
-        return new Line(firstClick.getX(), firstClick.getY(), secondClick.getX(), secondClick.getY());
+        Line line = new Line(firstClick.getX(), firstClick.getY(), secondClick.getX(), secondClick.getY());
+        line.setStroke(color);
+        return line;
     }
 
     public void switchToRectangle(ActionEvent actionEvent) {
         chosenFigure=Figure.RECTANGLE;
         chosenFigureMsg.setText(chosenFigureMsgTemplate + "Rectangle");
+
     }
 
     public void switchToCircle(ActionEvent actionEvent) {
@@ -85,9 +92,16 @@ public class MainController {
         chosenFigureMsg.setText(chosenFigureMsgTemplate + "Line");
     }
 
-    public void editFigure(ActionEvent actionEvent) {
+    public void editConfig(ActionEvent actionEvent) {
+        String chosenColor = colorText.getText();
+        if (! chosenColor.matches("0[xX][0-9a-fA-F]{8}")){
+            colorText.setText("");
+            colorText.setPromptText("Color must be in hexagonal format e.g. 0xFF00FF00");
+            return;
+        }
+        color = Color.web(chosenColor);
+        colorText.setText(color.toString());
     }
-
 
     private void cleanClicks() {
         secondClick = null;
