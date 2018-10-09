@@ -36,7 +36,7 @@ public class MainController {
     private boolean figureIsBeeingDragged = false;
 
     public void chosePoint(MouseEvent event) {
-        if (figureIsBeeingDragged){
+        if (figureIsBeeingDragged) {
             figureIsBeeingDragged = false;
             return;
         }
@@ -66,11 +66,7 @@ public class MainController {
     private Node drawCircle() {
         double radian = firstClick.distance(secondClick);
         Circle circle = new Circle(firstClick.getX(), firstClick.getY(), radian, color);
-        circle.setOnMousePressed((t) -> {
-            figureIsBeeingDragged = true;
-            orgSceneX = t.getSceneX();
-            orgSceneY = t.getSceneY();
-        });
+        circle.setOnMousePressed((t) -> setFirstChosenFigurePoint(t));
         circle.setOnMouseDragged((t) -> {
             figureIsBeeingDragged = true;
             double offsetX = t.getSceneX() - orgSceneX;
@@ -95,11 +91,7 @@ public class MainController {
         Rectangle rectangle = new Rectangle(firstClick.getX(), firstClick.getY(), width, height);
         rectangle.setFill(color);
 
-        rectangle.setOnMousePressed((t) -> {
-            figureIsBeeingDragged = true;
-            orgSceneX = t.getSceneX();
-            orgSceneY = t.getSceneY();
-        });
+        rectangle.setOnMousePressed((t) -> setFirstChosenFigurePoint(t));
         rectangle.setOnMouseDragged((t) -> {
             figureIsBeeingDragged = true;
             double offsetX = t.getSceneX() - orgSceneX;
@@ -121,11 +113,8 @@ public class MainController {
         Line line = new Line(firstClick.getX(), firstClick.getY(), secondClick.getX(), secondClick.getY());
         line.setStroke(color);
 
-        line.setOnMousePressed((t) -> {
-            figureIsBeeingDragged = true;
-            orgSceneX = t.getSceneX();
-            orgSceneY = t.getSceneY();
-        });
+        line.setOnMousePressed((t) ->
+                setFirstChosenFigurePoint(t));
         line.setOnMouseDragged((t) -> {
             figureIsBeeingDragged = true;
             double offsetX = t.getSceneX() - orgSceneX;
@@ -176,5 +165,12 @@ public class MainController {
     private void cleanClicks() {
         secondClick = null;
         firstClick = null;
+    }
+
+
+    public void setFirstChosenFigurePoint(MouseEvent click) {
+        figureIsBeeingDragged = true;
+        orgSceneX = click.getSceneX();
+        orgSceneY = click.getSceneY();
     }
 }
