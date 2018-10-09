@@ -12,6 +12,8 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
+import java.util.HashMap;
+
 
 public class MainController {
     @FXML
@@ -35,8 +37,10 @@ public class MainController {
 
     private double orgSceneX, orgSceneY;
     private boolean figureIsBeingDragged = false;
-    double offsetX;
-    double offsetY;
+    private double offsetX;
+    private double offsetY;
+
+    private HashMap<Node, Circle> characteristicspointList = new HashMap<>();
 
     public void chosePoint(MouseEvent event) {
         if (figureIsBeingDragged) {
@@ -91,6 +95,7 @@ public class MainController {
         mainPane.getChildren().add(characteristicPoint);
         chosenFigure = circle;
         chosenFigureType = Figure.CIRCLE;
+        characteristicspointList.put(circle, characteristicPoint);
     }
 
 
@@ -121,6 +126,7 @@ public class MainController {
         mainPane.getChildren().add(characteristicPoint);
         chosenFigure = rectangle;
         chosenFigureType = Figure.RECTANGLE;
+        characteristicspointList.put(rectangle, characteristicPoint);
     }
 
     private void drawLine() {
@@ -159,6 +165,7 @@ public class MainController {
         mainPane.getChildren().add(characteristicPoint);
         chosenFigure = line;
         chosenFigureType = Figure.LINE;
+        characteristicspointList.put(line, characteristicPoint);
     }
 
     private void stretchRectangle(Rectangle rectangle) {
@@ -241,19 +248,28 @@ public class MainController {
 
     private void resizeRectangle(double factor) {
         Rectangle rectangle = (Rectangle) chosenFigure;
+
         rectangle.setHeight(rectangle.getHeight() * factor);
         rectangle.setWidth(rectangle.getWidth() * factor);
+
     }
 
     private void resizeLine(double factor) {
         Line line = (Line) chosenFigure;
-        line.setStartX(line.getStartX() * factor);
+
         line.setEndX(line.getEndX() * factor);
+
+        Circle point = characteristicspointList.get(line);
     }
 
     private void resizeCircle(double factor) {
         Circle circle = (Circle) chosenFigure;
+
+        double prevRadius = circle.getRadius();
+
         circle.setRadius(circle.getRadius() * factor);
+        Circle point = characteristicspointList.get(circle);
+        point.setCenterY(point.getCenterY() + (prevRadius - circle.getRadius()));
     }
 
     private void dragRectangle(MouseEvent t, Rectangle r) {
