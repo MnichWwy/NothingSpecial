@@ -12,8 +12,6 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
-import java.util.HashMap;
-
 
 public class MainController {
     @FXML
@@ -25,7 +23,6 @@ public class MainController {
     @FXML
     private TextField figureToDrawMsg;
 
-
     public enum Figure {LINE, CIRCLE, RECTANGLE}
 
     private Figure figureToDraw = Figure.RECTANGLE;
@@ -35,10 +32,8 @@ public class MainController {
     private final String figureToDrawMsgTemplate = "Chosen figure: ";
     private Figure chosenFigureType = null;
     private Node chosenFigure = null;
-    private HashMap<Node, Circle> nodesList = new HashMap<>();
 
     private double orgSceneX, orgSceneY;
-    private double orgScene1X, orgScene1Y;
     private boolean figureIsBeingDragged = false;
     double offsetX;
     double offsetY;
@@ -53,93 +48,81 @@ public class MainController {
             mainPane.getChildren().add(new Circle(event.getX(), event.getY(), 0.3, color));
         } else {
             secondClick = new Point2D(event.getX(), event.getY());
-            Node node = draw();
-            mainPane.getChildren().add(node);
-            Circle characteristic = nodesList.get(node);
-            if (characteristic != null)
-                mainPane.getChildren().add(characteristic);
+            draw();
             cleanClicks();
         }
     }
 
-    private Node draw() {
+    private void draw() {
         switch (figureToDraw) {
             case LINE:
-                return drawLine();
+                drawLine();
+                return;
             case RECTANGLE:
-                return drawRectangle();
+                drawRectangle();
+                return;
             case CIRCLE:
-                return drawCircle();
+                drawCircle();
+                return;
         }
-        return null;
     }
 
-    private Node drawCircle() {
+    private void drawCircle() {
         double radian = firstClick.distance(secondClick);
         Circle circle = new Circle(firstClick.getX(), firstClick.getY(), radian, color);
+        Circle characteristicPoint = new Circle(circle.getCenterX(), circle.getCenterY() - circle.getRadius(), 3, color);
         circle.setOnMousePressed((t) -> {
             chosenFigure = circle;
             chosenFigureType = Figure.CIRCLE;
             setFirstChosenFigurePoint(t);
         });
-        circle.setOnMouseDragged((t) -> dragCircle(t));
-        return circle;
+        circle.setOnMouseDragged((t) -> {
+            dragCircle(t, circle);
+            dragCharacteristics(characteristicPoint);
+        });
+
+        characteristicPoint.setOnMousePressed((t) -> setFirstChosenFigurePoint(t));
+        characteristicPoint.setOnMouseDragged((t) -> {
+                    dragCircleInVerticalOnly(t, characteristicPoint);
+                    stretchCircle(circle);
+                }
+        );
+        mainPane.getChildren().add(circle);
+        mainPane.getChildren().add(characteristicPoint);
     }
 
 
-    private Node drawRectangle() {
+    private void drawRectangle() {
         double width = secondClick.getX() - firstClick.getX();
         double height = secondClick.getY() - firstClick.getY();
         Rectangle rectangle = new Rectangle(firstClick.getX(), firstClick.getY(), width, height);
         rectangle.setFill(color);
-
+        Circle characteristicPoint = new Circle(rectangle.getX(), rectangle.getY(), 3, color);
         rectangle.setOnMousePressed((t) -> {
             chosenFigure = rectangle;
             chosenFigureType = Figure.RECTANGLE;
             setFirstChosenFigurePoint(t);
         });
-        rectangle.setOnMouseDragged((t) -> dragRectangle(t,rectangle));
-        Circle characteristicPoint = new Circle(rectangle.getX(), rectangle.getY(), 3, color);
+        rectangle.setOnMouseDragged((t) -> {
+            dragRectangle(t, rectangle);
+            dragCharacteristics(characteristicPoint);
+
+        });
 
         characteristicPoint.setOnMousePressed((t) -> setFirstChosenFigurePoint(t));
         characteristicPoint.setOnMouseDragged((t) -> {
-                    dragCircle(t);
-                    strechRectangle(t, rectangle);
+                    dragCircle(t, characteristicPoint);
+                    stretchRectangle(rectangle);
                 }
         );
-        nodesList.put(rectangle, characteristicPoint);
-
-        return rectangle;
+        mainPane.getChildren().add(rectangle);
+        mainPane.getChildren().add(characteristicPoint);
     }
 
-    private void dragRectangle(MouseEvent t,Rectangle r) {
-        figureIsBeingDragged = true;
-        offsetX = t.getSceneX() - orgSceneX;
-        offsetY = t.getSceneY() - orgSceneY;
-
-//        Rectangle r = (Rectangle) (t.getSource());
-
-        r.setX(r.getX() + offsetX);
-        r.setY(r.getY() + offsetY);
-
-        orgSceneX = t.getSceneX();
-        orgSceneY = t.getSceneY();
-    }
-
-    private void strechRectangle(MouseEvent t, Rectangle rectangle) {
-        figureIsBeingDragged = true;
-
-        rectangle.setX(rectangle.getX() + offsetX);
-        rectangle.setY(rectangle.getY() + offsetY);
-        rectangle.setWidth(rectangle.getWidth() - offsetX);
-        rectangle.setHeight(rectangle.getHeight() - offsetY);
-
-    }
-
-
-    private Node drawLine() {
+    private void drawLine() {
         Line line = new Line(firstClick.getX(), firstClick.getY(), secondClick.getX(), secondClick.getY());
         line.setStroke(color);
+        Circle characteristicPoint = new Circle(line.getStartX(), line.getStartY(), 3, color);
 
         line.setOnMousePressed((t) -> {
             chosenFigure = line;
@@ -162,13 +145,42 @@ public class MainController {
             orgSceneY = t.getSceneY();
 
         });
-        return line;
+        characteristicPoint.setOnMousePressed((t) -> setFirstChosenFigurePoint(t));
+        characteristicPoint.setOnMouseDragged((t) -> {
+                    dragCircle(t, characteristicPoint);
+                    stretchLine(line);
+                }
+        );
+        mainPane.getChildren().add(line);
+        mainPane.getChildren().add(characteristicPoint);
     }
+
+    private void stretchRectangle(Rectangle rectangle) {
+        figureIsBeingDragged = true;
+
+        rectangle.setX(rectangle.getX() + offsetX);
+        rectangle.setY(rectangle.getY() + offsetY);
+        rectangle.setWidth(rectangle.getWidth() - offsetX);
+        rectangle.setHeight(rectangle.getHeight() - offsetY);
+    }
+
+    private void stretchCircle(Circle circle) {
+        figureIsBeingDragged = true;
+
+        circle.setRadius(circle.getRadius() - offsetY);
+    }
+
+    private void stretchLine(Line line) {
+        figureIsBeingDragged = true;
+
+        line.setStartX(line.getStartX() + offsetX);
+        line.setStartY(line.getStartY() + offsetY);
+    }
+
 
     public void switchToRectangle(ActionEvent actionEvent) {
         figureToDraw = Figure.RECTANGLE;
         figureToDrawMsg.setText(figureToDrawMsgTemplate + "Rectangle");
-
     }
 
     public void switchToCircle(ActionEvent actionEvent) {
@@ -205,26 +217,6 @@ public class MainController {
         orgSceneY = click.getSceneY();
     }
 
-//    private Node drawCharacteristicPoint(Node node) {
-//        switch (figureToDraw) {
-//            case LINE:
-//                return drawLine();
-//            case RECTANGLE:
-//                return drawRectangleCharacteristicPoint((Rectangle) node);
-//            case CIRCLE:
-//                return drawCircle();
-//        }
-//        return null;
-//    }
-//
-//    private Circle drawRectangleCharacteristicPoint(Rectangle rectangle) {
-//        Circle circle = new Circle(rectangle.getX(), rectangle.getY(), 0.5);
-//        rectangle.xProperty().bind(circle.centerXProperty());
-//        circle.centerYProperty().bind(rectangle.yProperty());
-//        circle.setOnMousePressed((t) -> setFirstChosenFigurePoint(t));
-//        return circle;
-//    }
-
     public void modifyFigure(ActionEvent actionEvent) {
         double factor = Double.parseDouble(resizeText.getText());
         switch (chosenFigureType) {
@@ -258,19 +250,43 @@ public class MainController {
         circle.setRadius(circle.getRadius() * factor);
     }
 
-    private void dragCircle(MouseEvent t) {
+    private void dragRectangle(MouseEvent t, Rectangle r) {
         figureIsBeingDragged = true;
         offsetX = t.getSceneX() - orgSceneX;
         offsetY = t.getSceneY() - orgSceneY;
+        r.setX(r.getX() + offsetX);
+        r.setY(r.getY() + offsetY);
 
-        Circle c = (Circle) (t.getSource());
+        orgSceneX = t.getSceneX();
+        orgSceneY = t.getSceneY();
+
+    }
+
+    private void dragCircle(MouseEvent t, Circle c) {
+        figureIsBeingDragged = true;
+        offsetX = t.getSceneX() - orgSceneX;
+        offsetY = t.getSceneY() - orgSceneY;
 
         c.setCenterX(c.getCenterX() + offsetX);
         c.setCenterY(c.getCenterY() + offsetY);
 
         orgSceneX = t.getSceneX();
         orgSceneY = t.getSceneY();
+    }
 
+    private void dragCircleInVerticalOnly(MouseEvent t, Circle c) {
+        figureIsBeingDragged = true;
+        offsetY = t.getSceneY() - orgSceneY;
+
+        c.setCenterY(c.getCenterY() + offsetY);
+
+        orgSceneY = t.getSceneY();
+    }
+
+    private void dragCharacteristics(Circle c) {
+        figureIsBeingDragged = true;
+        c.setCenterX(c.getCenterX() + offsetX);
+        c.setCenterY(c.getCenterY() + offsetY);
     }
 }
 
