@@ -26,7 +26,7 @@ public class MainController {
 
     private enum Figure {LINE, CIRCLE, RECTANGLE}
 
-    private Figure chosenFigure = Figure.CIRCLE;
+    private Figure chosenFigure = Figure.RECTANGLE;
     private Point firstClick = null;
     private Point secondClick = null;
     private final String chosenFigureMsgTemplate = "Chosen figure: ";

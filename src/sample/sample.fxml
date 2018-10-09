@@ -29,7 +29,7 @@
             <Button mnemonicParsing="false" onAction="#switchToRectangle" text="Rectangle" />
             <Button mnemonicParsing="false" onAction="#switchToCircle" text="Circle" />
             <Button mnemonicParsing="false" onAction="#switchToLine" text="Line" />
-            <TextField fx:id="figureMsg" editable="false" prefHeight="31.0" prefWidth="401.0" text="Chosen figure: line" />
+            <TextField fx:id="chosenFigureMsg" editable="false" prefHeight="31.0" prefWidth="401.0" promptText="Chosen figure: Rectangle" />
          </children>
       </HBox>
       <VBox prefHeight="200.0" prefWidth="100.0" />
