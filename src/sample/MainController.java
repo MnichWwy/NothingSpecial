@@ -17,27 +17,31 @@ public class MainController {
     @FXML
     private Pane mainPane;
     @FXML
-    private TextField thicknessText;
+    private TextField resizeText;
     @FXML
     private TextField colorText;
     @FXML
-    private TextField chosenFigureMsg;
+    private TextField figureToDrawMsg;
+
 
     public enum Figure {LINE, CIRCLE, RECTANGLE}
 
-    private Figure chosenFigure = Figure.RECTANGLE;
+    private Figure figureToDraw = Figure.RECTANGLE;
     private Point2D firstClick = null;
     private Point2D secondClick = null;
     private Color color = Color.BLACK;
-    private final String chosenFigureMsgTemplate = "Chosen figure: ";
+    private final String figureToDrawMsgTemplate = "Chosen figure: ";
+    private Figure chosenFigureType = null;
+    private Node chosenFigure = null;
+
 
     private double orgSceneX, orgSceneY;
     private double orgScene1X, orgScene1Y;
-    private boolean figureIsBeeingDragged = false;
+    private boolean figureIsBeingDragged = false;
 
     public void chosePoint(MouseEvent event) {
-        if (figureIsBeeingDragged) {
-            figureIsBeeingDragged = false;
+        if (figureIsBeingDragged) {
+            figureIsBeingDragged = false;
             return;
         }
         if (firstClick == null) {
@@ -47,12 +51,14 @@ public class MainController {
             secondClick = new Point2D(event.getX(), event.getY());
             Node node = draw();
             mainPane.getChildren().add(node);
+//            Node characteristic = drawCharacteristicPoint(node);
+//            mainPane.getChildren().add(characteristic);
             cleanClicks();
         }
     }
 
     private Node draw() {
-        switch (chosenFigure) {
+        switch (figureToDraw) {
             case LINE:
                 return drawLine();
             case RECTANGLE:
@@ -66,9 +72,13 @@ public class MainController {
     private Node drawCircle() {
         double radian = firstClick.distance(secondClick);
         Circle circle = new Circle(firstClick.getX(), firstClick.getY(), radian, color);
-        circle.setOnMousePressed((t) -> setFirstChosenFigurePoint(t));
+        circle.setOnMousePressed((t) -> {
+            chosenFigure = circle;
+            chosenFigureType = Figure.CIRCLE;
+            setFirstChosenFigurePoint(t);
+        });
         circle.setOnMouseDragged((t) -> {
-            figureIsBeeingDragged = true;
+            figureIsBeingDragged = true;
             double offsetX = t.getSceneX() - orgSceneX;
             double offsetY = t.getSceneY() - orgSceneY;
 
@@ -91,9 +101,13 @@ public class MainController {
         Rectangle rectangle = new Rectangle(firstClick.getX(), firstClick.getY(), width, height);
         rectangle.setFill(color);
 
-        rectangle.setOnMousePressed((t) -> setFirstChosenFigurePoint(t));
+        rectangle.setOnMousePressed((t) -> {
+            chosenFigure = rectangle;
+            chosenFigureType = Figure.RECTANGLE;
+            setFirstChosenFigurePoint(t);
+        });
         rectangle.setOnMouseDragged((t) -> {
-            figureIsBeeingDragged = true;
+            figureIsBeingDragged = true;
             double offsetX = t.getSceneX() - orgSceneX;
             double offsetY = t.getSceneY() - orgSceneY;
 
@@ -106,6 +120,7 @@ public class MainController {
             orgSceneY = t.getSceneY();
 
         });
+
         return rectangle;
     }
 
@@ -113,10 +128,13 @@ public class MainController {
         Line line = new Line(firstClick.getX(), firstClick.getY(), secondClick.getX(), secondClick.getY());
         line.setStroke(color);
 
-        line.setOnMousePressed((t) ->
-                setFirstChosenFigurePoint(t));
+        line.setOnMousePressed((t) -> {
+            chosenFigure = line;
+            chosenFigureType = Figure.LINE;
+            setFirstChosenFigurePoint(t);
+        });
         line.setOnMouseDragged((t) -> {
-            figureIsBeeingDragged = true;
+            figureIsBeingDragged = true;
             double offsetX = t.getSceneX() - orgSceneX;
             double offsetY = t.getSceneY() - orgSceneY;
 
@@ -135,19 +153,19 @@ public class MainController {
     }
 
     public void switchToRectangle(ActionEvent actionEvent) {
-        chosenFigure = Figure.RECTANGLE;
-        chosenFigureMsg.setText(chosenFigureMsgTemplate + "Rectangle");
+        figureToDraw = Figure.RECTANGLE;
+        figureToDrawMsg.setText(figureToDrawMsgTemplate + "Rectangle");
 
     }
 
     public void switchToCircle(ActionEvent actionEvent) {
-        chosenFigure = Figure.CIRCLE;
-        chosenFigureMsg.setText(chosenFigureMsgTemplate + "Circle");
+        figureToDraw = Figure.CIRCLE;
+        figureToDrawMsg.setText(figureToDrawMsgTemplate + "Circle");
     }
 
     public void switchToLine(ActionEvent actionEvent) {
-        chosenFigure = Figure.LINE;
-        chosenFigureMsg.setText(chosenFigureMsgTemplate + "Line");
+        figureToDraw = Figure.LINE;
+        figureToDrawMsg.setText(figureToDrawMsgTemplate + "Line");
     }
 
     public void editConfig(ActionEvent actionEvent) {
@@ -168,9 +186,63 @@ public class MainController {
     }
 
 
-    public void setFirstChosenFigurePoint(MouseEvent click) {
-        figureIsBeeingDragged = true;
+    private void setFirstChosenFigurePoint(MouseEvent click) {
+        figureIsBeingDragged = true;
         orgSceneX = click.getSceneX();
         orgSceneY = click.getSceneY();
     }
+
+//    private Node drawCharacteristicPoint(Node node) {
+//        switch (figureToDraw) {
+//            case LINE:
+//                return drawLine();
+//            case RECTANGLE:
+//                return drawRectangleCharacteristicPoint((Rectangle) node);
+//            case CIRCLE:
+//                return drawCircle();
+//        }
+//        return null;
+//    }
+//
+//    private Circle drawRectangleCharacteristicPoint(Rectangle rectangle) {
+//        Circle circle = new Circle(rectangle.getX(), rectangle.getY(), 0.5);
+//        rectangle.xProperty().bind(circle.centerXProperty());
+//        circle.centerYProperty().bind(rectangle.yProperty());
+//        circle.setOnMousePressed((t) -> setFirstChosenFigurePoint(t));
+//        return circle;
+//    }
+
+    public void modifyFigure(ActionEvent actionEvent) {
+        double factor = Double.parseDouble(resizeText.getText());
+        switch (chosenFigureType) {
+            case RECTANGLE:
+                resizeRectangle(factor);
+                return;
+            case LINE:
+                resizeLine(factor);
+                return;
+            case CIRCLE:
+                resizeCircle(factor);
+                return;
+        }
+
+    }
+
+    private void resizeRectangle(double factor) {
+        Rectangle rectangle = (Rectangle) chosenFigure;
+        rectangle.setHeight(rectangle.getHeight() * factor);
+        rectangle.setWidth(rectangle.getWidth() * factor);
+    }
+
+    private void resizeLine(double factor) {
+        Line line = (Line) chosenFigure;
+        line.setStartX(line.getStartX() * factor);
+        line.setEndX(line.getEndX() * factor);
+    }
+
+    private void resizeCircle(double factor) {
+        Circle circle = (Circle) chosenFigure;
+        circle.setRadius(circle.getRadius() * factor);
+    }
+
 }
