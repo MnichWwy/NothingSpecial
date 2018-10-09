@@ -258,8 +258,6 @@ public class MainController {
         Line line = (Line) chosenFigure;
 
         line.setEndX(line.getEndX() * factor);
-
-        Circle point = characteristicspointList.get(line);
     }
 
     private void resizeCircle(double factor) {
