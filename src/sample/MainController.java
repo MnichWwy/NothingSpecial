@@ -89,6 +89,8 @@ public class MainController {
         );
         mainPane.getChildren().add(circle);
         mainPane.getChildren().add(characteristicPoint);
+        chosenFigure = circle;
+        chosenFigureType = Figure.CIRCLE;
     }
 
 
@@ -117,6 +119,8 @@ public class MainController {
         );
         mainPane.getChildren().add(rectangle);
         mainPane.getChildren().add(characteristicPoint);
+        chosenFigure = rectangle;
+        chosenFigureType = Figure.RECTANGLE;
     }
 
     private void drawLine() {
@@ -153,6 +157,8 @@ public class MainController {
         );
         mainPane.getChildren().add(line);
         mainPane.getChildren().add(characteristicPoint);
+        chosenFigure = line;
+        chosenFigureType = Figure.LINE;
     }
 
     private void stretchRectangle(Rectangle rectangle) {
