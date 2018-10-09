@@ -12,6 +12,8 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
+import java.util.HashMap;
+
 
 public class MainController {
     @FXML
@@ -33,11 +35,13 @@ public class MainController {
     private final String figureToDrawMsgTemplate = "Chosen figure: ";
     private Figure chosenFigureType = null;
     private Node chosenFigure = null;
-
+    private HashMap<Node, Circle> nodesList = new HashMap<>();
 
     private double orgSceneX, orgSceneY;
     private double orgScene1X, orgScene1Y;
     private boolean figureIsBeingDragged = false;
+    double offsetX;
+    double offsetY;
 
     public void chosePoint(MouseEvent event) {
         if (figureIsBeingDragged) {
@@ -51,8 +55,9 @@ public class MainController {
             secondClick = new Point2D(event.getX(), event.getY());
             Node node = draw();
             mainPane.getChildren().add(node);
-//            Node characteristic = drawCharacteristicPoint(node);
-//            mainPane.getChildren().add(characteristic);
+            Circle characteristic = nodesList.get(node);
+            if (characteristic != null)
+                mainPane.getChildren().add(characteristic);
             cleanClicks();
         }
     }
@@ -77,20 +82,7 @@ public class MainController {
             chosenFigureType = Figure.CIRCLE;
             setFirstChosenFigurePoint(t);
         });
-        circle.setOnMouseDragged((t) -> {
-            figureIsBeingDragged = true;
-            double offsetX = t.getSceneX() - orgSceneX;
-            double offsetY = t.getSceneY() - orgSceneY;
-
-            Circle c = (Circle) (t.getSource());
-
-            c.setCenterX(c.getCenterX() + offsetX);
-            c.setCenterY(c.getCenterY() + offsetY);
-
-            orgSceneX = t.getSceneX();
-            orgSceneY = t.getSceneY();
-
-        });
+        circle.setOnMouseDragged((t) -> dragCircle(t));
         return circle;
     }
 
@@ -106,23 +98,44 @@ public class MainController {
             chosenFigureType = Figure.RECTANGLE;
             setFirstChosenFigurePoint(t);
         });
-        rectangle.setOnMouseDragged((t) -> {
-            figureIsBeingDragged = true;
-            double offsetX = t.getSceneX() - orgSceneX;
-            double offsetY = t.getSceneY() - orgSceneY;
+        rectangle.setOnMouseDragged((t) -> dragRectangle(t,rectangle));
+        Circle characteristicPoint = new Circle(rectangle.getX(), rectangle.getY(), 3, color);
 
-            Rectangle r = (Rectangle) (t.getSource());
-
-            r.setX(r.getX() + offsetX);
-            r.setY(r.getY() + offsetY);
-
-            orgSceneX = t.getSceneX();
-            orgSceneY = t.getSceneY();
-
-        });
+        characteristicPoint.setOnMousePressed((t) -> setFirstChosenFigurePoint(t));
+        characteristicPoint.setOnMouseDragged((t) -> {
+                    dragCircle(t);
+                    strechRectangle(t, rectangle);
+                }
+        );
+        nodesList.put(rectangle, characteristicPoint);
 
         return rectangle;
     }
+
+    private void dragRectangle(MouseEvent t,Rectangle r) {
+        figureIsBeingDragged = true;
+        offsetX = t.getSceneX() - orgSceneX;
+        offsetY = t.getSceneY() - orgSceneY;
+
+//        Rectangle r = (Rectangle) (t.getSource());
+
+        r.setX(r.getX() + offsetX);
+        r.setY(r.getY() + offsetY);
+
+        orgSceneX = t.getSceneX();
+        orgSceneY = t.getSceneY();
+    }
+
+    private void strechRectangle(MouseEvent t, Rectangle rectangle) {
+        figureIsBeingDragged = true;
+
+        rectangle.setX(rectangle.getX() + offsetX);
+        rectangle.setY(rectangle.getY() + offsetY);
+        rectangle.setWidth(rectangle.getWidth() - offsetX);
+        rectangle.setHeight(rectangle.getHeight() - offsetY);
+
+    }
+
 
     private Node drawLine() {
         Line line = new Line(firstClick.getX(), firstClick.getY(), secondClick.getX(), secondClick.getY());
@@ -245,4 +258,20 @@ public class MainController {
         circle.setRadius(circle.getRadius() * factor);
     }
 
+    private void dragCircle(MouseEvent t) {
+        figureIsBeingDragged = true;
+        offsetX = t.getSceneX() - orgSceneX;
+        offsetY = t.getSceneY() - orgSceneY;
+
+        Circle c = (Circle) (t.getSource());
+
+        c.setCenterX(c.getCenterX() + offsetX);
+        c.setCenterY(c.getCenterY() + offsetY);
+
+        orgSceneX = t.getSceneX();
+        orgSceneY = t.getSceneY();
+
+    }
 }
+
+
