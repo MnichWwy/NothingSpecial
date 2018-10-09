@@ -94,7 +94,7 @@ public class MainController {
 
     public void editConfig(ActionEvent actionEvent) {
         String chosenColor = colorText.getText();
-        if (! chosenColor.matches("0[xX][0-9a-fA-F]{8}")){
+        if (! chosenColor.matches("0[xX][0-9a-fA-F]{6,8}")){
             colorText.setText("");
             colorText.setPromptText("Color must be in hexagonal format e.g. 0xFF00FF00");
             return;
